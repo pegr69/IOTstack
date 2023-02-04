@@ -1,10 +1,10 @@
 # Nextcloud
 
-## <a name="serviceDefinition"> Service definition </a>
+## Service definition { #serviceDefinition }
 
 This is the **core** of the IOTstack Nextcloud service definition:
 
-```yml
+``` { .yaml linenums="1" }
 nextcloud:
   container_name: nextcloud
   image: nextcloud
@@ -20,6 +20,9 @@ nextcloud:
     - ./volumes/nextcloud/html:/var/www/html
   depends_on:
     - nextcloud_db
+  networks:
+    - default
+    - nextcloud
 
 nextcloud_db:
   container_name: nextcloud_db
@@ -33,16 +36,19 @@ nextcloud_db:
     - MYSQL_PASSWORD=«user_password»
     - MYSQL_DATABASE=nextcloud
     - MYSQL_USER=nextcloud
-  ports:
-    - "9322:3306"
   volumes:
     - ./volumes/nextcloud/db:/config
     - ./volumes/nextcloud/db_backup:/backup
+  networks:
+    - nextcloud
 ```
 
 There are two containers, one for the cloud service itself, and the other for the database. Both containers share the same persistent storage area in the volumes subdirectory so they are treated as a unit. This will not interfere with any other MariaDB containers you might wish to run.
 
-Depending on the IOTstack branch you are running, there may also be `networks:` directives. Other than to note that new menu dedicates a network to inter-container communications, those directives make no difference for this discussion.
+Key points:
+
+* You do **not** need to select MariaDB in the IOTstack menu just to run NextCloud. Some tutorials suggest you do. They are wrong!
+* If you *choose* to select MariaDB in the IOTstack menu, understand that it is a *separate* instance of the relational database management system. It has no relationship with NextCloud.  
 
 Under old-menu, you are responsible for setting passwords. The passwords are "internal use only" and it is unlikely that you will need them unless you plan to go ferreting-about in the database using SQL. The rules are:
 
@@ -54,25 +60,25 @@ Under new-menu, the menu can generate random passwords for you. You can either u
 * Two instances of `%randomMySqlPassword%` (the `«user_password»`)
 * One instance of `%randomPassword%` (the `«root_password»`)
 
-The passwords need to be set before you bring up the Nextcloud service for the first time but the following initialisation steps assume you might not have done that and always start over from a clean slate.
+The passwords need to be set before you bring up the Nextcloud service for the first time. However, the following initialisation steps assume you might not have done that and always start from a clean slate.
 
-## <a name="initialisation"> Initialising Nextcloud </a>
+## Initialising Nextcloud  { #initialisation }
 
 1. Be in the correct directory:
 
-	```
+	```console
 	$ cd ~/IOTstack
 	```
 
 2. If the stack is running, take it down:
 
-	```
+	```console
 	$ docker-compose down
 	```
 
 3. Erase the persistent storage area for Nextcloud (double-check the command *before* you hit return):
 
-	```
+	```console
 	$ sudo rm -rf ./volumes/nextcloud
 	```
 
@@ -80,7 +86,7 @@ The passwords need to be set before you bring up the Nextcloud service for the f
 
 4. Bring up the stack:
 
-	```
+	```console
 	$ docker-compose up -d
 	```
 
@@ -88,13 +94,13 @@ The passwords need to be set before you bring up the Nextcloud service for the f
 
 	Repeat the following command two or three times at 10-second intervals:
 
-	```
+	```console
 	$ docker ps
 	```
 
 	You are looking for evidence that the `nextcloud` and `nextcloud_db` containers are up, stable, and not restarting. If you see any evidence of restarts, try to figure out why using:
 
-	```
+	```console
 	$ docker logs nextcloud
 	```
 
@@ -136,9 +142,9 @@ The passwords need to be set before you bring up the Nextcloud service for the f
 
 	![Create Administrator Account](./images/nextcloud-createadminaccount.png)
 
-8. Create an administrator account and then click "Finish Setup".
+8. Create an administrator account and then click "Install".
 
-9. There is a long delay. In most cases, the "Recommended apps" screen appears and you can ignored the instructions in this section. However, if you see the following error:
+9. There is a long delay. In most cases, the "Recommended apps" screen appears and you can ignore the instructions in this step. However, if your browser returns a "Not Found" error like the following:
 
 	![Mal-formed URL](./images/nextcloud-malformedurl.png)
 	
@@ -160,7 +166,7 @@ The passwords need to be set before you bring up the Nextcloud service for the f
 	
 		* This seems to be the only time Nextcloud misbehaves and forces `localhost` into a URL.
 
-10. The "Recommended apps" screen appears. A spinner moves down the list of apps as they are loaded:
+10. The "Recommended apps" screen appears. Click "Install recommended apps". A spinner moves down the list of apps as they are loaded:
 
 	![Recommended Apps](./images/nextcloud-recommendedapps.png)
 
@@ -170,13 +176,13 @@ The passwords need to be set before you bring up the Nextcloud service for the f
 
 	![Post-initialisation](./images/nextcloud-postinitialisation.png)
 
-	Hover your mouse to the right of the floating window and keep clicking on the right-arrow button until you reach the last screen, then click "Start using Nextcloud".
+	Keep clicking on the right-arrow button until you reach the last screen, then click "Start using Nextcloud".
 
 12. Congratulations. Your IOTstack implementation of Nextcloud is ready to roll:
 
 	![Dashboard](./images/nextcloud-dashboard.png)
 
-## <a name="untrustedDomain">"Access through untrusted domain"</a>
+## "Access through untrusted domain" { #untrustedDomain }
 
 During Nextcloud initialisation you had to choose between an IP address, a domain name or a host name. Now that Nextcloud is running, you have the opportunity to expand your connection options.
 
@@ -213,7 +219,7 @@ Hint:
 
 * It is a good idea to make a backup of any file before you edit it. For example:
 
-	```
+	```console
 	$ cd ~/IOTstack/volumes/nextcloud/html/config/
 	$ sudo cp config.php config.php.bak
 	```
@@ -234,7 +240,7 @@ Search for "trusted_domains". To tell Nextcloud to trust **all** of the URLs abo
 
 Once you have finished editing the file, save your work then restart Nextcloud:
 
-```
+```console
 $ cd ~/IOTstack
 $ docker-compose restart nextcloud
 ```
@@ -245,7 +251,7 @@ See also:
 
 * [Nextcloud documentation - trusted domains](https://docs.nextcloud.com/server/21/admin_manual/installation/installation_wizard.html#trusted-domains).
 
-### <a name="dnsAlias"> Using a DNS alias for your Nextcloud service </a>
+### Using a DNS alias for your Nextcloud service { #dnsAlias }
 
 The examples above include using a DNS alias (a CNAME record) for your Nextcloud service. If you decide to do that, you may see this warning in the log:
 
@@ -253,27 +259,27 @@ The examples above include using a DNS alias (a CNAME record) for your Nextcloud
 Could not reliably determine the server's fully qualified domain name
 ```
 
-You can silence the warning by editing the Nextcloud service definition in `docker-compose.yml` to add your fully-qualified DNS alias to at `hostname` directive. For example:
+You can silence the warning by editing the Nextcloud service definition in `docker-compose.yml` to add your fully-qualified DNS alias using a `hostname` directive. For example:
 
-```
+```yaml
     hostname: nextcloud.mydomain.com
 ```
 
-## <a name="security"> Security considerations</a>
+## Security considerations { #security }
 
 Nextcloud traffic is not encrypted. Do **not** expose it to the web by opening a port on your home router. Instead, use a VPN like Wireguard to provide secure access to your home network, and let your remote clients access Nextcloud over the VPN tunnel.
 
-## <a name="healthCheck"> Container health check </a>
+## Container health check  { #healthCheck }
 
 A script , or "agent", to assess the health of the MariaDB container has been added to the *local image* via the *Dockerfile*. In other words, the script is specific to IOTstack.
 
-Because it is an instance of MariaDB, Nextcloud_DB inherits the health-check agent. See the [IOTstack MariaDB](https://sensorsiot.github.io/IOTstack/Containers/MariaDB/) documentation for more information.
+Because it is an instance of MariaDB, Nextcloud_DB inherits the health-check agent. See the [IOTstack MariaDB](MariaDB.md) documentation for more information.
 
-## <a name="updatingNextcloud"> Keeping Nextcloud up-to-date </a>
+## Keeping Nextcloud up-to-date { #updatingNextcloud }
 
 To update the `nextcloud` container:
 
-```
+```console
 $ cd ~/IOTstack
 $ docker-compose pull nextcloud
 $ docker-compose up -d nextcloud
@@ -282,25 +288,24 @@ $ docker system prune
 
 To update the `nextcloud_db` container:
 
-```
+```console
 $ cd ~/IOTstack
 $ docker-compose build --no-cache --pull nextcloud_db
 $ docker-compose up -d nextcloud_db
 $ docker system prune
-$ docker system prune
 ```
 
-The first "prune" removes the old *local* image, the second removes the old *base* image.
+> You may need to run the `prune` command twice if you are using a 1.x version of `docker-compose`.
 
-## <a name="backups"> Backups </a>
+## Backups { #backups }
 
 Nextcloud is currently excluded from the IOTstack-supplied backup scripts due to its potential size.
 
-> This is also true for [Paraphraser/IOTstackBackup](https://github.com/Paraphraser/IOTstackBackup).
+> [Paraphraser/IOTstackBackup](https://github.com/Paraphraser/IOTstackBackup) includes backup and restore for NextCloud.
 
 If you want to take a backup, something like the following will get the job done:
 
-```
+```console
 $ cd ~/IOTstack
 $ BACKUP_TAR_GZ=$PWD/backups/$(date +"%Y-%m-%d_%H%M").$HOSTNAME.nextcloud-backup.tar.gz
 $ touch "$BACKUP_TAR_GZ"
@@ -316,7 +321,7 @@ Notes:
 
 To restore, you first need to identify the name of the backup file by looking in the `backups` directory. Then:
 
-```
+```console
 $ cd ~/IOTstack
 $ RESTORE_TAR_GZ=$PWD/backups/2021-06-12_1321.sec-dev.nextcloud-backup.tar.gz
 $ docker-compose rm --force --stop -v nextcloud nextcloud_db
@@ -334,3 +339,74 @@ The external drive will have to be an ext4 formatted drive because smb, fat32 an
 Finally, a warning:
 
 * If your database gets corrupted then your Nextcloud is pretty much stuffed.
+
+## Network Model { #networkModel }
+
+A walkthrough of a network model may help you to understand how Nextcloud and its database communicate. To help set the scene, the following model shows a Raspberry Pi with Docker running four containers:
+
+* `nextcloud` and `nextcloud_db` - both added when you select "NextCloud"
+* `mariadb` - optional container added when you select "MariaDB"
+* `wireguard` - optional container added when you select "WireGuard"
+
+![Network Model](./images/nextcloud-network-model.jpeg)
+
+The first thing to understand is that the `nextcloud_db` and `mariadb` containers are both instances of MariaDB. They are instantiated from the same *image* but they have completely separate existences. They have different persistent storage areas (ie databases) and they do not share data.
+
+The second thing to understand is how the networks inside the "Docker" rectangle shown in the model are created. The `networks` section of your compose file defines the networks:
+
+``` yaml
+networks:
+
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+
+  nextcloud:
+    driver: bridge
+    internal: true
+    ipam:
+      driver: default
+```
+
+At run time, the lower-case representation of the directory containing the compose file (ie "iotstack") is prepended to the network names, resulting in:
+
+* `default` ⟹ `iotstack_default`
+* `nextcloud` ⟹ `iotstack_nextcloud`
+
+Each network is assigned a /16 IPv4 subnet. Unless you override it, the subnet ranges are chosen at random. This model assumes:
+
+* `iotstack_default` is assigned 172.18.0.0/16
+* `iotstack_nextcloud` is assigned 172.19.0.0/16
+
+The logical router on each network takes the `.0.1` address.
+
+> The reason why two octets are devoted to the host address is because a /16 network prefix implies a 16-bit host portion. Each octet describes 8 bits.
+
+As each container is brought up, the network(s) it joins are governed by the following rules:
+
+1. If there is an explicit `networks:` clause in the container's service definition then the container joins the network(s) listed in the body of the clause; otherwise
+2. The container joins the `default` network.
+
+Assuming that the `mariadb` and `wireguard` containers do not have `networks:` clauses, the result of applying those rules is shown in the following table.
+ 
+![Effect of networks clause](./images/nextcloud-networks-clause.jpeg)
+
+Each container is assigned an IPv4 address on each network it joins. In general, the addresses are assigned in the order in which the containers start.
+
+No container can easily predict either the network prefix of the networks it joins or the IP address of any other container. However, Docker provides a mechanism for any container to reach any other container with which it shares a network by using the destination container's name.
+
+In this model there are two MariaDB instances, one named `nextcloud_db` and the other named `mariadb`. How does the `nextcloud` container know which **name** to use? Simple. It's passed in an environment variable:
+
+```
+environment:
+  - MYSQL_HOST=nextcloud_db
+```
+
+At runtime, the `nextcloud` container references `nextcloud_db:3306`. Docker resolves `nextcloud_db` to 172.19.0.2 so the traffic traverses the 172.19/16 internal bridged network and arrives at the `nextcloud_db` container.
+
+The `nextcloud` container *could* reach the `mariadb` container via `mariadb:3306`. There's no ambiguity because Docker resolves `mariadb` to 172.18.0.2, which is a different subnet and an entirely different internal bridged network. 
+
+> There would still be no ambiguity even if all containers attached to the `iotstack_default` network because each container name still resolves to a distinct IP address.
+
+In terms of **external** ports, only `mariadb` exposes port 3306. Any external process trying to reach 192.168.203.60:3306 will always be port-forwarded to the `mariadb` container. The `iotstack_nextcloud` network is declared "internal" which means it is unreachable from beyond the Raspberry Pi. Any port-mappings associated with that network are ignored.

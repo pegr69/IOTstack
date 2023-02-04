@@ -1,3 +1,5 @@
+# MariaDB
+
 ## Source
 
 * [Docker hub](https://hub.docker.com/r/linuxserver/mariadb/)
@@ -17,7 +19,7 @@ The port is 3306. It exists inside the docker network so you can connect via `ma
 
 Before starting the stack, edit the `docker-compose.yml` file and check your environment variables. In particular:
 
-```
+```yaml
   environment:
     - TZ=Etc/UTC
     - MYSQL_ROOT_PASSWORD=
@@ -34,7 +36,7 @@ You only get the opportunity to change the `MQSL_` prefixed environment variable
 
 	* Stop the container and remove the persistent storage area:
 
-		```
+		``` console
 		$ cd ~/IOTstack
 		$ docker-compose rm --force --stop -v mariadb
 		$ sudo rm -rf ./volumes/mariadb
@@ -43,8 +45,8 @@ You only get the opportunity to change the `MQSL_` prefixed environment variable
 	* Edit `docker-compose.yml` and change the variables.
 	* Bring up the container:
 
-		```
-		$ docker-compose up -d mariadb 
+		``` console
+		$ docker-compose up -d mariadb
 		```
 
 2. Open a terminal window within the container (see below) and change the values by hand.
@@ -55,18 +57,20 @@ You only get the opportunity to change the `MQSL_` prefixed environment variable
 
 You can open a terminal session within the mariadb container via:
 
-```
+``` console
 $ docker exec -it mariadb bash
 ```
+
+To connect to the database: `mysql -uroot -p`
 
 To close the terminal session, either:
 
 * type "exit" and press <kbd>return</kbd>; or
 * press <kbd>control</kbd>+<kbd>d</kbd>.
 
-## <a name="healthCheck"> Container health check </a>
+## Container health check { #healthCheck }
 
-### <a name="healthCheckTheory"> theory of operation </a>
+### theory of operation { #healthCheckTheory }
 
 A script , or "agent", to assess the health of the MariaDB container has been added to the *local image* via the *Dockerfile*. In other words, the script is specific to IOTstack.
 
@@ -88,13 +92,13 @@ The agent is invoked 30 seconds after the container starts, and every 30 seconds
 
 4. If all of those steps succeed, the agent concludes that MariaDB is functioning properly and returns "healthy".
 
-### <a name="healthCheckMonitor"> monitoring health-check </a>
+### monitoring health-check { #healthCheckMonitor }
 
 Portainer's *Containers* display contains a *Status* column which shows health-check results for all containers that support the feature.
 
 You can also use the `docker ps` command to monitor health-check results. The following command narrows the focus to mariadb:
 
-```bash
+``` console
 $ docker ps --format "table {{.Names}}\t{{.Status}}"  --filter name=mariadb
 ```
 
@@ -121,7 +125,7 @@ Possible reply patterns are:
 	mariadb   Up About a minute (unhealthy)
 	```
 
-### <a name="healthCheckCustom"> customising health-check </a>
+### customising health-check { #healthCheckCustom }
 
 You can customise the operation of the health-check agent by editing the `mariadb` service definition in your *Compose* file:
 
@@ -165,7 +169,7 @@ You can customise the operation of the health-check agent by editing the `mariad
 
 To update the `mariadb` container:
 
-```
+``` console
 $ cd ~/IOTstack
 $ docker-compose build --no-cache --pull mariadb
 $ docker-compose up -d mariadb

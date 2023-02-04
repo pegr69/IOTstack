@@ -1,16 +1,16 @@
 # Kapacitor
  
-## <a name="references"> References </a>
+## References
 
 - [*influxdata Kapacitor* documentation](https://docs.influxdata.com/kapacitor/)
 - [*GitHub*: influxdata/influxdata-docker/kapacitor](https://github.com/influxdata/influxdata-docker/tree/master/kapacitor)
 - [*DockerHub*: influxdata Kapacitor](https://hub.docker.com/_/kapacitor)
 
-## <a name="upgradingKapacitor"> Upgrading Kapacitor </a>
+## Upgrading Kapacitor
 
 You can update the container via:
 
-```bash
+``` console
 $ cd ~/IOTstack
 $ docker-compose pull
 $ docker-compose up -d
@@ -23,20 +23,20 @@ In words:
 * `docker-compose up -d` causes any newly-downloaded images to be instantiated as containers (replacing the old containers); and
 * the `prune` gets rid of the outdated images.
 
-### <a name="versionPinning"> Kapacitor version pinning </a>
+### Kapacitor version pinning
 
 If you need to pin to a particular version:
 
 1. Use your favourite text editor to open `docker-compose.yml`.
 2. Find the line:
 
-	```
+	``` yaml
    image: kapacitor:1.5
 	```
 
 3. Replace `1.5` with the version you wish to pin to. For example, to pin to version 1.5.9:
 
-	```
+	``` yaml
    image: kapacitor:1.5.9
 	```
 	
@@ -46,7 +46,7 @@ If you need to pin to a particular version:
 
 4. Save the file and tell `docker-compose` to bring up the container:
 
-	```bash
+	``` console
 	$ cd ~/IOTstack
 	$ docker-compose up -d kapacitor
 	$ docker system prune

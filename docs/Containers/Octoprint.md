@@ -1,3 +1,6 @@
+---
+title: Octoprint
+---
 # OctoPrint – the snappy web interface for your 3D printer
 
 ## References
@@ -11,7 +14,7 @@
 
 When you select "OctoPrint" in the IOTstack menu, the service definition in your `docker-compose.yml`, contains the following under the `devices:` heading:
 
-```
+``` yaml
 devices:
   - /dev/ttyAMA0:/dev/ttyACM0
 # - /dev/video0:/dev/video0
@@ -37,7 +40,7 @@ If the OctoPrint container is up when the device number changes, the container w
 
 The "xxxxxxxx" is (usually) unique to your 3D printer. To find it, connect your printer to your Raspberry Pi, then run the command:
 
-```
+``` console
 $ ls -1 /dev/serial/by-id
 ```
 
@@ -54,7 +57,7 @@ Note:
 
 Assuming the above example output was the answer, edit `docker-compose.yml` to look like this:
 
-```
+``` yaml
 devices:
   - /dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_3b14eaa48a154d5e87032d59459d5206-if00-port0:/dev/ttyACM0
 ```
@@ -74,7 +77,7 @@ Suppose your 3D printer is a MasterDisaster5000Pro, and that you would like to b
 
 Start by disconnecting your 3D printer from your Raspberry Pi. Next, run this command:
 
-```
+``` console
 $ tail -f /var/log/messages
 ```
 
@@ -115,7 +118,7 @@ SUBSYSTEM=="tty", ATTRS{idVendor}=="dead", ATTRS{idProduct}=="beef", ATTRS{seria
 
 Next, ensure the required file exists by executing the following command:
 
-```
+``` console
 $ sudo touch /etc/udev/rules.d/99-usb-serial.rules
 ```
 
@@ -133,7 +136,7 @@ $ ls /dev
 
 You should expect to see the human-readable name you chose in the list of devices. You can then edit `docker-compose.yml` to use the name in the device mapping.
 
-```
+``` yaml
 devices:
   - /dev/MasterDisaster5000Pro:/dev/ttyACM0
 ```
@@ -157,7 +160,7 @@ To activate a Raspberry Pi camera attached via ribbon cable:
 2. Confirm the presence of `/dev/video0`.
 3. Edit `docker-compose.yml` and uncomment **all** of the commented-out lines in the following:
 
-	```
+	``` yaml
 	devices:
 	# - /dev/video0:/dev/video0
 	environment:
@@ -172,7 +175,7 @@ To activate a Raspberry Pi camera attached via ribbon cable:
 
 The three environment variables are required:
 
-```
+``` yaml
 environment:
   - ENABLE_MJPG_STREAMER=true
   - MJPG_STREAMER_INPUT=-r 640x480 -f 10 -y
@@ -190,7 +193,7 @@ The typical specs for a baseline Raspberry Pi camera are:
 
 For that type of camera, the following is probably more appropriate:
 
-```
+``` yaml
   - MJPG_STREAMER_INPUT=-r 1152x648 -f 10
 ```
 
@@ -205,7 +208,7 @@ To start a print session:
 1. Turn the 3D printer on.
 2. Bring up the container:
 
-	```
+	``` console
 	$ cd ~/IOTstack
 	$ docker-compose up -d octoprint
 	```
@@ -321,7 +324,7 @@ Whichever method you choose will result in a refresh of the OctoPrint user inter
 
 Run the following commands:
 
-```
+``` console
 $ cd ~/IOTstack
 $ docker-compose restart octoprint
 ```
@@ -352,7 +355,7 @@ Unless you intend to leave your printer switched on 24 hours a day, you will als
 
 1. Terminate the container:
 
-	```
+	``` console
 	$ cd ~/IOTstack
 	$ docker-compose stop octoprint
 	$ docker-compose rm -f octoprint
@@ -378,7 +381,7 @@ To silence the warning:
 
 1. Terminate the container if it is running:
 
-	```
+	``` console
 	$ cd ~/IOTstack
 	$ docker-compose stop octoprint
 	$ docker-compose rm -f octoprint
@@ -392,7 +395,7 @@ To silence the warning:
 
 3. Implement the following pattern:
 
-	```
+	``` yaml
 	server:
 	  …
 	  ipCheck:
@@ -409,7 +412,7 @@ To silence the warning:
 4. Save the file.
 5. Bring up the container: 
 
-	```
+	``` console
 	$ cd ~/IOTstack
 	$ docker-compose up -d octoprint
 	```
@@ -418,7 +421,7 @@ To silence the warning:
 
 You can check for updates like this:
 
-```
+``` console
 $ cd ~/IOTstack
 $ docker-compose pull octoprint
 $ docker-compose up -d octoprint
@@ -429,7 +432,7 @@ $ docker system prune
 
 You can view a list of usernames like this:
 
-```
+``` console
 $ docker exec octoprint octoprint --basedir /octoprint/octoprint user list
 ```
 
@@ -437,19 +440,19 @@ To reset a user's password:
 
 1. Use the following line as a template and replace `«username»` and `«password»` with appropriate values:
 
-	```
-	docker exec octoprint octoprint --basedir /octoprint/octoprint user password --password «password» «username»
+	``` console
+	$ docker exec octoprint octoprint --basedir /octoprint/octoprint user password --password «password» «username»
 	```
 	
 2. Execute the edited command. For example, to set the password for user "me" to "verySecure":
 
-	```
+	``` console
 	$ docker exec octoprint octoprint --basedir /octoprint/octoprint user password --password verySecure me
 	```
 
 3. Restart OctoPrint:
 
-	```
+	``` console
 	$ cd ~/IOTstack
 	$ docker-compose restart octoprint
 	```
@@ -458,7 +461,7 @@ Note:
 
 * OctoPrint supports more than one username. To explore the further:
 
-	```
+	``` console
 	$ docker exec octoprint octoprint --basedir /octoprint/octoprint user --help
 	```
 
@@ -466,7 +469,7 @@ Note:
 
 If the OctoPrint container seems to be misbehaving, you can get a "clean slate" by:
 
-```
+``` console
 $ cd ~/IOTstack
 $ docker-compose stop octoprint
 $ docker-compose rm -f octoprint

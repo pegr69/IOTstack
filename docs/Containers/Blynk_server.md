@@ -2,7 +2,7 @@
 
 This document discusses an IOTstack-specific version of Blynk-Server. It is built on top of an [Ubuntu](https://hub.docker.com/_/ubuntu) base image using a *Dockerfile*.
 
-## <a name="references"> References </a>
+## References { #references }
 
 - [Ubuntu base image](https://hub.docker.com/_/ubuntu) at DockerHub
 - [Peter Knight Blynk-Server fork](https://github.com/Peterkn2001/blynk-server) at GitHub (includes documentation)
@@ -18,7 +18,7 @@ Acknowledgement:
 
 - Original writeup from @877dev
 
-## <a name="significantFiles"> Significant directories and files </a>
+## Significant directories and files { #significantFiles }
 
 ```
 ~/IOTstack
@@ -56,30 +56,30 @@ Everything in ❽:
 * will be replaced if it is not present when the container starts; but
 * will never be overwritten if altered by you.
 
-## <a name="howBlynkServerIOTstackGetsBuilt"> How Blynk Server gets built for IOTstack </a>
+## How Blynk Server gets built for IOTstack { #howBlynkServerIOTstackGetsBuilt }
 
-### <a name="dockerHubImages"> GitHub Updates </a>
+### GitHub Updates  { #dockerHubImages }
 
 Periodically, the source code is updated and a new version is released. You can check for the latest version at the [releases page](https://github.com/Peterkn2001/blynk-server/releases/).
  
-### <a name="iotstackMenu"> IOTstack menu </a>
+### IOTstack menu { #iotstackMenu }
 
 When you select Blynk Server in the IOTstack menu, the *template service definition* is copied into the *Compose* file.
 
 > Under old menu, it is also copied to the *working service definition* and then not really used.
 
-### <a name="iotstackFirstRun"> IOTstack first run </a>
+### IOTstack first run  { #iotstackFirstRun }
 
 On a first install of IOTstack, you run the menu, choose your containers, and are told to do this:
 
-```bash
+```console
 $ cd ~/IOTstack
 $ docker-compose up -d
 ```
 
 `docker-compose` reads the *Compose* file. When it arrives at the `blynk_server` fragment, it finds:
 
-```
+```yaml
   blynk_server:
     build:
       context: ./.templates/blynk_server/.
@@ -99,7 +99,7 @@ The `BLYNK_SERVER_VERSION` argument is passed into the build process. This impli
 
 The *Dockerfile* begins with:
 
-```
+```Dockerfile
 FROM ubuntu
 ```
 
@@ -115,9 +115,9 @@ The remaining instructions in the *Dockerfile* customise the ***base image*** to
 
 The ***local image*** is instantiated to become your running container.
 
-When you run the `docker images` command after Blynk Server has been built, you will see two rows that are relevant:
+When you run the `docker images` command after Blynk Server has been built, you *may* see two rows that are relevant:
 
-```bash
+```console
 $ docker images
 REPOSITORY              TAG      IMAGE ID       CREATED         SIZE
 iotstack_blynk_server   latest   3cd6445f8a7e   3 hours ago     652MB
@@ -127,17 +127,19 @@ ubuntu                  latest   897590a6c564   7 days ago      49.8MB
 * `ubuntu ` is the ***base image***; and
 * `iotstack_blynk_server ` is the ***local image***.
 
-You will see the same pattern in *Portainer*, which reports the ***base image*** as "unused". You should not remove the ***base*** image, even though it appears to be unused.
+You *may* see the same pattern in *Portainer*, which reports the ***base image*** as "unused". You should not remove the ***base*** image, even though it appears to be unused.
 
-## <a name="logging"> Logging </a>
+> Whether you see one or two rows depends on the version of `docker-compose` you are using and how your version of `docker-compose` builds local images.
+
+## Logging { #logging }
 
 You can inspect Blynk Server's log by:
 
-```
+```console
 $ docker logs blynk_server
 ```
 
-## <a name="editConfiguration"> Changing Blynk Server's configuration </a>
+## Changing Blynk Server's configuration { #editConfiguration }
 
 The first time you launch the `blynk_server` container, the following structure will be created in the persistent storage area:
 
@@ -151,16 +153,16 @@ The first time you launch the `blynk_server` container, the following structure 
 
 The two `.properties` files can be used to alter Blynk Server's configuration. When you make change to these files, you activate then by restarting the container:
 
-```
+```console
 $ cd ~/IOTstack
 $ docker-compose restart blynk_server
 ```
 
-## <a name="cleanSlate"> Getting a clean slate </a>
+## Getting a clean slate { #cleanSlate }
 
 Erasing Blynk Server's persistent storage area triggers self-healing and restores known defaults:
 
-```
+```console
 $ cd ~/IOTstack
 $ docker-compose rm --force --stop -v blynk_server
 $ sudo rm -rf ./volumes/blynk_server
@@ -170,13 +172,13 @@ Note:
 
 * You can also remove individual configuration files and then trigger self-healing. For example, if you decide to edit `server.properties` and make a mess, you can restore the original default version like this:
 
-	```
+	```console
 	$ cd ~/IOTstack
 	$ rm volumes/blynk_server/config/server.properties
 	$ docker-compose restart blynk_server
 	```
 
-## <a name="upgradingBlynkServer"> Upgrading Blynk Server </a>
+## Upgrading Blynk Server { #upgradingBlynkServer }
 
 To find out when a new version has been released, you need to visit the [Blynk-Server releases](https://github.com/Peterkn2001/blynk-server/releases/) page at GitHub.
 
@@ -184,7 +186,7 @@ At the time of writing, version 0.41.16 was the most up-to-date. Suppose that ve
 
 1. Edit your *Compose* file to change the version nuumber:
 
-	```
+	```yaml
 	  blynk_server:
 	    build:
 	      context: ./.templates/blynk_server/.
@@ -200,7 +202,7 @@ At the time of writing, version 0.41.16 was the most up-to-date. Suppose that ve
 
 	- If you only want to reconstruct the **local** image:
 
-		```
+		```console
 		$ cd ~/IOTstack
 		$ docker-compose up --build -d blynk_server
 		$ docker system prune -f
@@ -208,7 +210,7 @@ At the time of writing, version 0.41.16 was the most up-to-date. Suppose that ve
 
 	- If you want to update the Ubuntu **base** image at the same time:
 
-		```
+		```console
 		$ cd ~/IOTstack
 		$ docker-compose build --no-cache --pull blynk_server
 		$ docker-compose up -d blynk_server
@@ -216,11 +218,13 @@ At the time of writing, version 0.41.16 was the most up-to-date. Suppose that ve
 		$ docker system prune -f
 		```
 
-## <a name="usingBlynkServer"> Using Blynk Server </a>
+		The second `prune` will only be needed if there is an old *base image* and that, in turn, depends on the version of `docker-compose` you are using and how your version of `docker-compose` builds local images.
+
+## Using Blynk Server { #usingBlynkServer }
 
 See the [References](#references) for documentation links.
 
-### <a name="blynkAdmin"> Connecting to the administrative UI </a>
+### Connecting to the administrative UI { #blynkAdmin }
 
 To connect to the administrative interface, navigate to:
 
@@ -233,30 +237,30 @@ You may encounter browser security warnings which you will have to acknowledge i
 - username = `admin@blynk.cc`
 - password = `admin`
 
-### <a name="changePassword"> Change username and password </a>
+### Change username and password { #changePassword }
 
 1. Click on Users > "email address" and edit email, name and password. 
 2. Save changes.
 3. Restart the container using either Portainer or the command line:
 
-	```
+	```console
 	$ cd ~/IOTstack
 	$ docker-compose restart blynk_server
 	```
 
-### <a name="gmailSetup"> Setup gmail </a>
+### Setup gmail { #gmailSetup }
 
 Optional step, useful for getting the auth token emailed to you.
 (To be added once confirmed working....)
 
-### <a name="mobileSetup"> iOS/Android app setup </a>
+### iOS/Android app setup { #mobileSetup }
 
 1. When setting up the application on your mobile be sure to select "custom" setup [see](https://github.com/Peterkn2001/blynk-server#app-and-sketch-changes).
 2. Press "New Project"
 3. Give it a name, choose device "Raspberry Pi 3 B" so you have plenty of [virtual pins](http://help.blynk.cc/en/articles/512061-what-is-virtual-pins) available, and lastly select WiFi.
 4. Create project and the [auth token](https://docs.blynk.cc/#getting-started-getting-started-with-the-blynk-app-4-auth-token) will be emailed to you (if emails configured). You can also find the token in app under the phone app settings, or in the admin web interface by clicking Users>"email address" and scroll down to token.
 
-### <a name="quickAppGuide"> Quick usage guide for app </a>
+### Quick usage guide for app { #quickAppGuide }
 
 1. Press on the empty page, the widgets will appear from the right.
 2. Select your widget, let's say a button.
@@ -269,7 +273,7 @@ Optional step, useful for getting the auth token emailed to you.
 
 Enter Node-Red.....
 
-### <a name="enterNodeRed"> Node-RED </a>
+### Node-RED { #enterNodeRed }
 
 1. Install `node-red-contrib-blynk-ws` from Manage Palette.
 2. Drag a "write event" node into your flow, and connect to a debug node
