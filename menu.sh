@@ -11,6 +11,8 @@ REQ_PYTHON_VERSION=3.6.9
 
 PYTHON_CMD=python3
 
+DEBUG_OPT="-m debugpy --listen 5678"
+
 sys_arch=$(uname -m)
 
 # ----------------------------------------------
@@ -401,4 +403,4 @@ else
 fi
 
 # Hand control to new menu
-$PYTHON_CMD ./scripts/menu_main.py $ENCODING_TYPE
+$PYTHON_CMD $DEBUG_OPT ./scripts/menu_main.py $ENCODING_TYPE

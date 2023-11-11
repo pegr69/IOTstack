@@ -1,0 +1,32 @@
+iobroker:
+  container_name: iobroker
+  restart: on-failure
+  expose:
+      - "8081"
+      - "8082"
+  ports:
+      - "8081:8081"
+      - "8082:8082"
+  image: buanet/iobroker:latest
+  privileged: true
+  stdin_open: true
+  volumes:
+      - ./volumes/iobroker:/opt/iobroker
+      - /dev:/dev
+  networks:
+      - iobroker-network
+  environment:
+   - IOB_ADMINPORT=8081
+   - PACKAGES=mc
+   - ZWAVE=false
+   - USBDEVICES=/dev/ttyUSB000;/dev/ttyACM0
+   - PUID=1000
+   - PGID=1000
+   - TZ=Europe/Berlin
+   
+## NETWORKING
+networks:
+   local:
+       driver: bridge
+   iobroker-network:
+       driver: bridge
