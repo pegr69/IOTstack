@@ -124,8 +124,14 @@ Begin by stopping Grafana:
 
 ``` console
 $ cd ~/IOTstack
+<<<<<<< HEAD
 $ docker-compose stop grafana
+=======
+$ docker-compose down grafana
+>>>>>>> 7a05f3262f18f9839ba267cdfee44f8c731ab445
 ```
+
+> see also [if downing a container doesn't work](../Basic_setup/index.md/#downContainer)
 
 You have two options:
 
