@@ -33,7 +33,7 @@
 
 	This is a good basis for getting started. If it sounds like it will meet your needs, you will not need to make any changes. Otherwise, review the [environment variables](#envVars) and make appropriate changes to the service definition in your *compose file*.
 
-5. Bring up your stack: { #upStack }
+5. <a name="upStack"></a>Bring up your stack:
 
 	```console
 	$ cd ~/IOTstack
@@ -147,7 +147,7 @@ For those reasons, it is better to take the time to identify your Zigbee adapter
 
 8. Continue from [bring up your stack](#upStack).
 
-## Configuration { #configuration }
+## Configuration
 
 ### Environment variables { #envVars }
 
@@ -168,7 +168,7 @@ $ docker-compose up -d zigbee2mqtt
 
 The default service definition provided with IOTstack includes the following environment variables:
 
-* `ZIGBEE2MQTT_CONFIG_MQTT_SERVER=mqtt://mosquitto:1883` { #mqttServer }
+* <a name="mqttServer"></a>`ZIGBEE2MQTT_CONFIG_MQTT_SERVER=mqtt://mosquitto:1883`
 
 	Typical values for this are:
 
@@ -191,11 +191,11 @@ The default service definition provided with IOTstack includes the following env
 
 		The `depends_on` clause ensures that the Mosquitto container starts alongside the Zigbee2MQTT container. That would not be appropriate if Mosquitto was running on a separate computer.
 	
-* `ZIGBEE2MQTT_CONFIG_FRONTEND=true` { #frontEndEnable }
+* <a name="frontEndEnable"></a>`ZIGBEE2MQTT_CONFIG_FRONTEND=true`
 
 	This variable activates the Zigbee2MQTT web interface on port 8080. If you want to change the port number where you access the Zigbee2MQTT web interface, see [connecting to the web GUI](#connectGUI).
 
-* `ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_SYMLINK_CURRENT=true` { #logSymlink }
+* <a name="logSymlink"></a>`ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_SYMLINK_CURRENT=true`
 
 	Defining this variable causes Zigbee2MQTT to create a symlink pointing to the current log **folder** at the path:
 
@@ -205,7 +205,7 @@ The default service definition provided with IOTstack includes the following env
 
 	See [Checking the log](#checkLog) for more information about why this is useful.
 	
-* `- DEBUG=zigbee-herdsman*` { #enableDebug }
+* `- DEBUG=zigbee-herdsman*`
 
 	Enabling this variable turns on extended debugging inside the container.
 
@@ -235,7 +235,7 @@ Note:
 
 * If you start Zigbee2MQTT from a clean slate (ie where the configuration file does not exist) **and** your *compose file* does not define the [`… MQTT_SERVER`](#mqttServer) environment variable discussed above, the container will go into a restart loop. This happens because the Zigbee2MQTT container defaults to trying to reach the Mosquitto broker at `localhost:1883` instead of `mosquitto:1883`. That usually fails.
 
-## Verifying basic operation { #verifyOperation }
+## Verifying basic operation
 
 ### Checking status { #checkStatus }
 
@@ -335,7 +335,7 @@ Notes:
 	$ docker-compose up -d zigbee2mqtt
 	```
 
-## Shell access to the container { #openShell }
+## Shell access to the container
 
 To open a shell inside the Zigbee2MQTT container, run:
 
@@ -347,7 +347,7 @@ $ docker exec -it zigbee2mqtt ash
 
 To close the shell and leave the container, either type "exit" and press <kbd>return</kbd>, or press <kbd>Control</kbd><kbd>d</kbd>.
 
-## Container maintenance { #pullUpgrade }
+## Container maintenance
 
 When you become aware of a new version of Zigbee2MQTT on [DockerHub](https://hub.docker.com/r/koenkk/zigbee2mqtt/tags), do the following:
 
@@ -442,7 +442,7 @@ The changes you should make to your existing Zigbee2MQTT service definition are:
 
 	This ensures the Mosquitto container is brought up alongside Zigbee2MQTT. The Zigbee2MQTT container goes into a restart loop if Mosquitto is not reachable so this change enforces that business rule. See [`… MQTT_SERVER`](#mqttServer) for the situation where this might not be appropriate.
 
-### pre-existing configuration file { #confExists }
+### pre-existing configuration file
 
 Environment variables in your *compose file* override corresponding values set in the *configuration file* at:
 
