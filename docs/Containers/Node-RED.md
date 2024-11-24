@@ -45,9 +45,9 @@ Periodically, the source code is recompiled and pushed to [nodered/node-red](htt
 
 ### IOTstack menu { #iotstackMenu }
 
-When you select Node-RED in the IOTstack menu, the *template service definition* is copied into the *Compose* file.
+When you select Node-RED in the IOTstack menu, the *template service definition* ❶ is copied into the *Compose* file ❹.
 
-> Under old menu, it is also copied to the *working service definition* and then not really used.
+> Under old menu, it is also copied to the *working service definition* ❸ and then not really used.
 
 You choose add-on nodes from a supplementary menu. We recommend accepting the default nodes, and adding others that you think you are likely to need. Node-RED will not build if you do not select at least one add-on node.
 
@@ -56,7 +56,7 @@ Key points:
 * Under new menu, you must press the right arrow to access the supplementary menu. Under old menu, the list of add-on nodes is displayed automatically. 
 * Do not be concerned if you can't find an add-on node you need in the list. You can also add nodes via Manage Palette once Node-RED is running. See [component management](#componentManagement).
 
-Choosing add-on nodes in the menu causes the *Dockerfile* to be created.
+Choosing add-on nodes in the menu causes the *Dockerfile* ❷ to be created.
 
 ### IOTstack first run { #iotstackFirstRun }
 
@@ -67,7 +67,7 @@ $ cd ~/IOTstack
 $ docker-compose up -d
 ```
 
-`docker-compose` reads the *Compose* file. When it arrives at the `nodered` service definition, it finds:
+`docker-compose` reads the *Compose* file ❹. When it arrives at the `nodered` service definition, it finds <a name="serviceBuildFragment"><a>:
 
 ``` yaml linenums="1"
   nodered:
@@ -87,11 +87,11 @@ Note:
 	    build: ./services/nodered/.
 	```
 
-	The older syntax meant all local customisations (version-pinning and adding extra packages) needed manual edits to the *Dockerfile*. Those edits would be overwritten each time the menu was re-run to alter the selected add-on nodes. The newer multi-line syntax avoids that problem.
+	The older syntax meant all local customisations (version-pinning and adding extra packages) needed manual edits to the *Dockerfile* ❷. Those edits would be overwritten each time the menu was re-run to alter the selected add-on nodes. The newer multi-line syntax avoids that problem.
 
 	See also [updating to July 2022 syntax](#july2022syntax).
 
-In either case, the path `./services/nodered/.` tells `docker-compose` to look for:
+In either case, the path `./services/nodered/.` tells `docker-compose` to look for ❷:
 
 ```
 ~/IOTstack/services/nodered/Dockerfile
@@ -106,25 +106,25 @@ Notes:
 
 	> Acknowledgement: Successful installation of the SQLite node is thanks to @fragolinux.
 
-When you run the `docker images` command after Node-RED has been built, you *may* see two rows for Node-RED:
+When you run the `docker images` command after Node-RED has been built, you will see something like this:
 
 ``` console
 $ docker images
-REPOSITORY               TAG                 IMAGE ID            CREATED             SIZE
-iotstack_nodered         latest              b0b21a97b8bb        4 days ago          462MB
-nodered/node-red         latest              deb99584fa75        5 days ago          385MB
+REPOSITORY               TAG       IMAGE ID       CREATED        SIZE
+iotstack-nodered         latest    9feeb87019cd   11 days ago    945MB
 ```
 
-* `nodered/node-red` is the *base image*; and
-* `iotstack_nodered` is the *local image*. The *local* image is the one that is instantiated to become the running container.
+The image name `iotstack-nodered` is the concatenation of two components:
 
-You *may* see the same pattern in Portainer, which reports the *base image* as "unused":
+1. The `docker-compose` *project* name. This is the all-lower-case representation of the name of the folder containing `docker-compose.yml`. In a default clone of IOTstack, the folder name is `IOTstack` so the project name is `iotstack`.
+2. The name of the service definition which, for Node-RED is `nodered`.
 
-![nodered-portainer-unused-image](./images/nodered-portainer-unused-image.png)
+When you install Node-RED for the first time, the entire process of downloading a *base* image from Dockerhub, building a *local* image by running your local Dockerfile ❷, and then instantiating that *local* image as your running container, is all completely automatic.
 
-You should not remove the *base* image, even though it appears to be unused.
+However, *after* that first build, your *local* image is essentially frozen and it needs special action on your part to keep it up-to-date. See [maintaining Node-RED](#maintainNodeRed) and, in particular:
 
-> Whether you see one or two rows depends on the version of Docker you are using and how your version of `docker-compose` builds local images.
+* [Re-building the local image](#rebuildNodeRed) if you change the Dockerfile; and
+* [Upgrading Node-RED](#upgradeNodeRed) if you want to reconstruct your *local* image based on an updated *base* image which has become available on [DockerHub](https://hub.docker.com/r/nodered/node-red/tags).
 
 ## Securing Node-RED { #securingNodeRed }
 
@@ -267,9 +267,9 @@ The third method is *portable*, meaning a flow can conceptually refer to "this" 
 	$ docker network inspect bridge | jq .[0].IPAM.Config[0].Gateway
 	"172.17.0.1"
 	```
-	
+
 	> If `jq` is not installed on your system, you can install it by running `sudo apt install -y jq`.
-	
+
 	If you use this method, your flows can refer to "this" host using the IP address "172.17.0.1".
 
 * Method 2
@@ -278,11 +278,11 @@ The third method is *portable*, meaning a flow can conceptually refer to "this" 
 
 	``` yaml
 	extra_hosts:
-	- "host.docker.internal:host-gateway"
+	  - "host.docker.internal:host-gateway"
 	```
 
 	If you use this method, your flows can refer to "this" host using the domain name "host.docker.internal".
-	
+
 	Generally the second method is recommended for IOTstack. That is because your flows will continue to work even if the 172.17.0.1 IP address changes. However, it does come with the disadvantage that, if you publish a flow containing this domain name, the flow will not work unless the recipient also adds the `extra_hosts` clause.
 
 ## GPIO Access { #accessGPIO }
@@ -428,15 +428,17 @@ To communicate with your Raspberry Pi's GPIO you need to do the following:
 4. Drag a `pi gpio` node onto the canvas. Configure it according to your needs.
 
 	The `Host` field should be set to one of:
-	
+
 	*  `172.17.0.1`; or
 	*  `host.docker.internal`
 
 	See also [Bridge network - default gateway](#defaultBridge).
-	
+
 	Don't try to use 127.0.0.1 because that is the loopback address of the Node-RED container.
 
-## Serial Port Access { #accessSerial }
+## Serial Devices { #accessSerial }
+
+### USB devices { #usbSerial }
 
 Node-RED running in a container *can* communicate with serial devices attached to your Raspberry Pi's USB ports. However, it does not work "out of the box". You need to set it up.
 
@@ -452,7 +454,6 @@ You have three basic options:
 
 	``` yaml
 	devices:
-	- …
 	  - "/dev/ttyUSB0:/dev/ttyUSB0"
 	```
 
@@ -477,8 +478,7 @@ You have three basic options:
 
 		``` yaml
 		volumes:
-		- …
-		- /dev:/dev:ro
+		  - /dev:/dev:ro
 		```
 
 		> The "read-only" flag (`:ro`) prevents the container from doing dangerous things like destroying your Raspberry Pi's SD or SSD. Please don't omit that flag!
@@ -496,12 +496,12 @@ You have three basic options:
 
 		```	 yaml
 		device_cgroup_rules:
-		- 'c 1:* rw' # access to devices like /dev/null
-		- 'c 188:* rmw' # change numbers to your device
+		  - 'c 1:* rw' # access to devices like /dev/null
+		  - 'c 188:* rmw' # change numbers to your device
 		```
 
 		In the above:
-		
+
 		* "188" is the major number for ttyUSB0 and you should substitute accordingly if your device has a different major number.
 
 		* the "*" is a wildcard for the minor number.
@@ -524,6 +524,102 @@ At the time of writing (Feb 2023), it was not possible to add `node-red-node-ser
 ``` Dockerfile
 RUN npm install node-red-node-serialport --build-from-source
 ```
+
+### hardware serial port { #piSerial }
+
+Historically, `/dev/ttyAMA0` referred to the Raspberry Pi's serial port. The situation became less straightforward once Pis gained Bluetooth capabilities:
+
+* On Pis *without* Bluetooth hardware:
+
+	- `/dev/ttyAMA0` means the serial port; and
+	- `/dev/serial0` is a symlink to `/dev/ttyAMA0`
+
+* On Pis *with* Bluetooth capabilities:
+
+	- `/dev/ttyS0` means the serial port; and
+	- `/dev/serial0` is a symlink to `/dev/ttyS0`
+
+	In addition, whether `/dev/ttyS0` (and, therefore, `/dev/serial0`) are present at runtime depends on adding the following line to `config.txt`:
+
+	```
+	enable_uart=1
+	```
+
+	And, if that isn't sufficiently confusing, the location of `config.txt` depends on the OS version:
+
+	* Bullseye (and earlier): `/boot/config.txt`
+	* Bookworm: `/boot/firmware/config.txt`
+
+Rolling all that together, if you want access to the hardware serial port from Node-RED, you need to:
+
+1. Add `enable_uart=1` to `config.txt`.
+2. Reboot.
+3. Add a device-mapping to Node-RED's service definition:
+
+	``` yaml
+	devices:
+	  - /dev/serial0:/dev/«internalDevice»
+	```
+
+	where `«internalDevice»` is whatever device the add-on node you're using is expecting, such as `ttyAMA0`.
+
+4. Recreate the Node-RED container by running:
+
+	``` console
+	$ cd ~/IOTstack
+	$ docker-compose up -d nodered
+	```
+
+### Bluetooth device { #bluetoothSupport }
+
+If you enable the `node-red-contrib-generic-ble` add on node, you will also need to make the following changes:
+
+1. If you are running Bookworm, you will need to use `sudo` to edit this file:
+
+	```
+	/boot/firmware/config.txt
+	```
+
+	You need to add this line to the end of the file:
+
+	```
+	dtparam=krnbt=off
+	```
+
+	You then need to reboot. This adds the Bluetooth device to `/dev`.
+
+2. Find the the Node-RED service definition in your `docker-compose.yml`:
+
+	* Add the following mapping to the `volumes:` clause:
+
+		```yaml
+		- /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+		```
+
+	* Add the following `devices:` clause:
+
+		```yaml
+		devices:
+		  - "/dev/serial1:/dev/serial1"
+		  - "/dev/vcio:/dev/vcio"
+		  - "/dev/gpiomem:/dev/gpiomem"
+		```
+
+3. Recreate the Node-RED container:
+
+	``` console
+	$ cd ~/IOTstack
+	$ docker-compose up -d nodered
+	```
+
+Notes:
+
+* These changes are *specific* to the Raspberry Pi. If you need Bluetooth support on non-Pi hardware, you will need to figure out the details for your chosen platform.
+* Historically, `/dev/ttyAMA0` meant the serial interface. Subsequently, it came to mean the Bluetooth interface but only where Bluetooth hardware was present, otherwise it still meant the serial interface.
+
+	On Bookworm and later, if it is present, `/dev/ttyAMA1` means the Bluetooth Interface.
+
+	On Bullseye and later, `/dev/serial1` is a symbolic link pointing to whichever of `/dev/ttyAMA0` or `/dev/ttyAMA1` means the Bluetooth interface. This means that `/dev/serial1` is the most reliable way of referring to the Bluetooth Interface. That's why it appears in the `devices:` clause above.
 
 ## Sharing files between Node-RED and the Raspberry Pi { #fileSharing }
 
@@ -1008,7 +1104,7 @@ To rebuild your *local* image:
 ``` console
 $ cd ~/IOTstack
 $ docker-compose up --build -d nodered
-$ docker system prune
+$ docker system prune -f
 ```
 
 Think of these commands as "re-running the *Dockerfile*". The only time a *base* image will be downloaded from *DockerHub is when a *base* image with a tag matching the value of `DOCKERHUB_TAG` can't be found on your Raspberry Pi.
@@ -1043,7 +1139,7 @@ Once a new version appears on [*DockerHub*](https://hub.docker.com), you can upg
 $ cd ~/IOTstack
 $ docker-compose build --no-cache --pull nodered
 $ docker-compose up -d nodered
-$ docker system prune
+$ docker system prune -f
 ```
 
 Breaking it down into parts:
@@ -1458,26 +1554,160 @@ All remaining lines of your original *Dockerfile* should be left as-is.
 
 Run the [re-building the local Node-RED image](#rebuildNodeRed) commands.
 
-## Bluetooth support { #bluetoothSupport }
+## Alpine vs Debian { #linuxDistro }
 
-If you enable the `node-red-contrib-generic-ble` add on node, you will also need to make the following changes to the Node-RED service definition in your `docker-compose.yml`:
+The first part of IOTstack's default service definition for Node-RED is shown at [IOTstack first run](#serviceBuildFragment). Although it is not immediately obvious, this results in a container which is based on the Alpine Linux distribution. You can confirm this by running:
 
-* Add the following mapping to the `volumes:` clause:
+``` console
+$ docker exec nodered grep "PRETTY_NAME" /etc/os-release
+PRETTY_NAME="Alpine Linux v3.20"
+```
 
-	```yaml
-	- /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+Historically, Node-RED has been distributed on on [Dockerhub](https://hub.docker.com/r/nodered/node-red/tags) as two distinct sets of Node-RED images:
+
+* Those based on the Alpine Linux distribution; and
+* Those based on the Debian Linux distribution.
+
+In general, Node-RED images have tracked Alpine releases more consistently than they have Debian. For example, at the time of writing (July 2024):
+
+Image Tag       | Distro | Image OS      | Current
+----------------|--------|---------------|--------
+`latest`        | Alpine | v3.20         | [v3.20](https://alpinelinux.org/releases/)
+`latest-debian` | Debian | 11 (bullseye) | [12 (bookworm)](https://www.debian.org/releases/)
+
+In addition, Node-RED images based on Alpine have offered a greater range of options when it comes to the embedded version of Node.js. At the time of writing:
+
+* image variants based on Alpine Linux include `latest-18`, `latest-20` and `latest-22`, implying a choice of Node.js versions 18, 20 and 22, with version 20 being the default;  while
+* the single image variant for Debian Linux is `latest-debian` which comes with Node.js version 20.
+
+Naturally, this situation could change at any time! This information is only here to make the point that, historically, Node-RED images based on Debian have lagged behind Alpine and have only supported a single version of Node.js. This is also the main reason why IOTstack defaults to Alpine images.
+
+However, there may be circumstances where you decide it is appropriate to run a Node-RED image based on Debian. The purpose of this section is not to explore scenarios nor weigh the pros and cons, merely to explain how to adapt your Node-RED service definition to accomplish it. Proceed as follows:
+
+1. Make a copy of your existing Dockerfile:
+
+	``` console
+	$ cd ~/IOTstack/services/nodered
+	$ cp Dockerfile Debian.Dockerfile
 	```
 
-* Add the following `devices:` clause:
+	The reason for making a copy is to preserve your existing (Alpine-aware) Dockerfile so you can easily switch back if you break something.
 
-	```yaml
-	devices:
-	  - "/dev/serial1:/dev/serial1"
-	  - "/dev/vcio:/dev/vcio"
-	  - "/dev/gpiomem:/dev/gpiomem"
+2. Open `Debian.Dockerfile` in a text editor and make the following changes:
+
+	* Find the line:
+
+		``` Dockerfile linenums="4"
+		ARG DOCKERHUB_TAG=latest
+		```
+
+		**Replace** that line with:
+
+		``` Dockerfile linenums="4"
+		ARG DOCKERHUB_TAG=latest-debian
+		```
+
+	* Find the line:
+
+		``` Dockerfile linenums="15"
+		RUN apk update && apk add --no-cache eudev-dev ${EXTRA_PACKAGES}
+		```
+
+		**Replace** that line with:
+
+		``` Dockerfile linenums="15"
+		RUN apt update && apt install -y udev ${EXTRA_PACKAGES}
+		```
+
+		`apk` is the Alpine package manager whereas `apt` is the Debian package manager.
+
+	* Save your work.
+
+3. Make a copy of your existing compose file:
+
+	``` console
+	$ cd ~/IOTstack
+	$ cp docker-compose.yml docker-compose.yml.bak
 	```
 
-Notes:
+	The reason for making a copy is to preserve your existing (Alpine-aware) service definition so you can easily switch back if you break something.
 
-* These changes are *specific* to the Raspberry Pi. If you need Bluetooth support on non-Pi hardware, you will need to figure out the details for your chosen platform.
-* Historically, `/dev/ttyAMA0` meant "the serial interface" on Raspberry Pis. Subsequently, it came to mean "the Bluetooth interface" where Bluetooth support was present. Now, `/dev/serial1` is used to mean "the Bluetooth interface".
+4. Open `docker-compose.yml ` in a text editor and make the following changes:
+
+	* Change the Node-RED `build` clause so that it looks like this:
+
+		``` yaml linenums="3"
+		    build:
+		      context: ./services/nodered/.
+		      dockerfile: Debian.Dockerfile
+		      args:
+		        - DOCKERHUB_TAG=latest-debian
+		        - EXTRA_PACKAGES=
+		```
+
+		There are two key edits:
+
+		1. **Insert** the `dockerfile` line (as line 5).
+		2. **Change** the right hand side of the `DOCKERHUB_TAG` argument from `latest` to `latest-debian` (line 7).
+
+	* If you have any `EXTRA_PACKAGES` specified, you will need to allow for any package-name differences between Alpine and Debian. For example, suppose you are using this list of extra packages with Alpine:
+
+		``` yaml linenums="8"
+		- EXTRA_PACKAGES=mosquitto-clients bind-tools tcpdump tree
+		```
+
+		The `mosquitto-clients`, `tcpdump` and `tree` packages have the same names in the `apk` (Alpine) package manager as they do in `apt` (Debian) whereas `bind-tools` is named `dnsutils` in the Debian repositories. Thus the extra packages list for a Debian build would need to be:
+
+		``` yaml linenums="8"
+		- EXTRA_PACKAGES=mosquitto-clients dnsutils tcpdump tree
+		```
+
+	* Save your work.
+
+5. Rebuild Node-RED:
+
+	``` console
+	$ cd ~/IOTstack
+	$ docker-compose build --no-cache --pull nodered
+	```
+
+	If the build process reports any errors, go back and check your work.
+
+6. Start the new container:
+
+	``` console
+	$ docker-compose up -d nodered
+	```
+
+7. Check that the new container is running properly and hasn't gone into a restart loop:
+
+	``` console
+	$ docker ps -a --format "table {{.Names}}\t{{.RunningFor}}\t{{.Status}}\t{{.Size}}" --filter name=nodered
+	NAMES     CREATED          STATUS                    SIZE
+	nodered   32 seconds ago   Up 31 seconds (healthy)   0B (virtual 945MB)
+	```
+
+	Providing the STATUS column reports "healthy" after roughly 30 seconds of runtime, it is usually safe to assume that the container is behaving normally.
+
+8. Verify the base Linux distribution being used by the container:
+
+	``` console
+	$ docker exec nodered grep "PRETTY_NAME" /etc/os-release
+	PRETTY_NAME="Debian GNU/Linux 11 (bullseye)"
+	```
+
+9. Check your Node-RED and Node.js versions:
+
+	``` console
+	$ docker exec nodered npm version --json | jq -r '[.["node-red-docker"],.["node"]] | @tsv'
+	4.0.2	20.15.0
+	```
+
+	Interpretation - the container is running:
+
+	* Node-RED version 4.0.2, with
+	* Node.js version 20.15.0
+
+The actual version numbers you see in the last two steps will depend (obviously) on whatever the good folks who maintain Node-RED thought was appropriate at the time they released whatever `latest-debian` variant is present on DockerHub at the moment when you perform the migration.
+
+Please keep in mind that none of this affects the IOTstack menu. Re-running the menu is likely to revert your Node-RED service definition to be based on Alpine images.

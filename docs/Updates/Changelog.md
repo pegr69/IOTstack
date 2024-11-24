@@ -22,7 +22,7 @@
 
 - New service: [Syncthing](../Containers/Syncthing.md)
 - Zigbee2MQTT: [Service definition change](
-  ../Containers/Zigbee2MQTT.md#service-definition-change)
+  ../Containers/Zigbee2MQTT.md#update202204)
 - Dropping support for Home Assistant Supervised. Home Assistant **Container**
   still available.
 - [Homebridge](../Containers/Homebridge.md) is now on port 8581

@@ -98,7 +98,7 @@ You have several options for how your remote peers resolve DNS requests:
 
 * `PEERDNS=auto`
 
-	DNS queries made on connected WireGuard clients should work as if they were made on the host. If you [configure](Pi-hole.md#piholePrimary) your ad-blocker into the host's `resolveconf.conf`, Wireguard clients will also automatically use it.
+	DNS queries made on connected WireGuard clients should work as if they were made on the host. If you configure [PiHole](Pi-hole.md) into the host's `resolveconf.conf`, Wireguard clients will also automatically use it.
 
 	Details:
 	    
