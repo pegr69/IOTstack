@@ -1,0 +1,12 @@
+filebrowser:
+    container_name: filebrowser # Name of the container
+    restart: unless-stopped
+    image: filebrowser/filebrowser:s6
+    ports:
+      - "8080:8080/tcp" # Always ensure the WUI port is first in the ports list.
+    environment:
+    - TZ=${TZ:-Etc/UTC}
+    volumes:
+       - ./volumes/filebrowser/root:/srv \
+       - ./volumes/filebrowser/filebrowser.db:/database/filebrowser.db \
+       - ./volumes/filebrowser/settings.json:/config/settings.json 
