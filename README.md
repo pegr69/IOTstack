@@ -27,7 +27,7 @@ Andreas Spiess:
 * 2019-10-27 #295 Raspberry Pi Server based on Docker, with VPN, Dropbox backup, Influx, Grafana, etc: IOTstack
 
 	[![#295](http://img.youtube.com/vi/a6mjt8tWUws/0.jpg)](https://www.youtube.com/watch?v=a6mjt8tWUws)
-
+ 
 OneMarcFifty:
 
 * 2021-02-02 Raspberry Pi 4 Home Automation Server with IOTstack
@@ -42,7 +42,7 @@ See [Getting Started](https://sensorsiot.github.io/IOTstack/Getting-Started) in 
 * How to migrate from the older gcgarner/IOTstack repository.
 * Running the menu to install Docker and set up your containers.
 * Useful Docker commands (start \& stop the stack, manage containers).
-* Stack maintenance.
+* Stack maintenance. 
 
 ### reporting issues
 

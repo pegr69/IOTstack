@@ -45,6 +45,8 @@ In words:
 * `docker-compose up -d` causes any newly-downloaded images to be instantiated as containers (replacing the old containers); and
 * the `prune` gets rid of the outdated images.
 
+See also [2025-03-04 patch](#patch1).
+
 ### Chronograf version pinning
 
 If you need to pin to a particular version:
@@ -69,3 +71,45 @@ If you need to pin to a particular version:
 	$ docker-compose up -d chronograf
 	$ docker system prune
 	```
+
+<a name="patch1"></a>
+## 2025-03-04 patch
+
+Chronograf does not start properly from a clean slate. The cause is explained [here](https://github.com/influxdata/influxdata-docker/pull/781).
+
+You can solve the problem in two ways:
+
+1. You can set the correct permissions yourself:
+
+	``` console
+	$ cd ~/IOTstack
+	$ docker-compose down chronograf
+	$ sudo chown -R 999:999 ./volumes/chronograf
+	$ docker-compose up -d chronograf
+	```
+	
+	Generally, this is a one-time fix. You will only need to repeat it if you start Chronograf from a clean slate.
+	
+2. You can adopt the updated service definition, either by:
+
+ 	- using the menu to delete then reinstall `chronograf`; or by
+ 	- using a text editor to hand-merge the contents of:
+
+		```
+		~/IOTstack/.templates/chronograf/service.yml
+		```
+		
+		with:
+		
+		```
+		~/IOTstack/docker-compose.yml
+		```
+
+If you adopt the updated service definition then the process for keeping Chronograf up-to-date becomes:
+
+``` console
+$ cd ~/IOTstack
+$ docker-compose build --no-cache --pull chronograf
+$ docker-compose up -d chronograf
+$ docker system prune
+```
